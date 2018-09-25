@@ -232,59 +232,62 @@
             },
 
             getTimePickerMainTemplate = function () {
-                var topRow = $('<tr>'),
+                var incrRow = $('<tr>'),
                     middleRow = $('<tr>'),
-                    bottomRow = $('<tr>');
+                    decrRow = $('<tr>');
+
+                var incrClass = options.reverseTimeNavigation ? options.icons.down : options.icons.up;
+                var decrClass = options.reverseTimeNavigation ? options.icons.up : options.icons.down;
 
                 if (isEnabled('h')) {
-                    topRow.append($('<td>')
-                        .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.incrementHour }).addClass('btn').attr('data-action', 'incrementHours').append($('<span>').addClass(options.icons.up))));
+                    incrRow.append($('<td>')
+                        .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.incrementHour }).addClass('btn').attr('data-action', 'incrementHours').append($('<span>').addClass(incrClass))));
                     middleRow.append($('<td>')
                         .append($('<span>').addClass('timepicker-hour').attr({ 'data-time-component': 'hours', 'title': options.tooltips.pickHour }).attr('data-action', 'showHours')));
-                    bottomRow.append($('<td>')
-                        .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.decrementHour }).addClass('btn').attr('data-action', 'decrementHours').append($('<span>').addClass(options.icons.down))));
+                    decrRow.append($('<td>')
+                        .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.decrementHour }).addClass('btn').attr('data-action', 'decrementHours').append($('<span>').addClass(decrClass))));
                 }
                 if (isEnabled('m')) {
                     if (isEnabled('h')) {
-                        topRow.append($('<td>').addClass('separator'));
+                        incrRow.append($('<td>').addClass('separator'));
                         middleRow.append($('<td>').addClass('separator').html(':'));
-                        bottomRow.append($('<td>').addClass('separator'));
+                        decrRow.append($('<td>').addClass('separator'));
                     }
-                    topRow.append($('<td>')
+                    incrRow.append($('<td>')
                         .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.incrementMinute }).addClass('btn').attr('data-action', 'incrementMinutes')
-                            .append($('<span>').addClass(options.icons.up))));
+                            .append($('<span>').addClass(incrClass))));
                     middleRow.append($('<td>')
                         .append($('<span>').addClass('timepicker-minute').attr({ 'data-time-component': 'minutes', 'title': options.tooltips.pickMinute }).attr('data-action', 'showMinutes')));
-                    bottomRow.append($('<td>')
+                    decrRow.append($('<td>')
                         .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.decrementMinute }).addClass('btn').attr('data-action', 'decrementMinutes')
-                            .append($('<span>').addClass(options.icons.down))));
+                            .append($('<span>').addClass(decrClass))));
                 }
                 if (isEnabled('s')) {
                     if (isEnabled('m')) {
-                        topRow.append($('<td>').addClass('separator'));
+                        incrRow.append($('<td>').addClass('separator'));
                         middleRow.append($('<td>').addClass('separator').html(':'));
-                        bottomRow.append($('<td>').addClass('separator'));
+                        decrRow.append($('<td>').addClass('separator'));
                     }
-                    topRow.append($('<td>')
+                    incrRow.append($('<td>')
                         .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.incrementSecond }).addClass('btn').attr('data-action', 'incrementSeconds')
-                            .append($('<span>').addClass(options.icons.up))));
+                            .append($('<span>').addClass(incrClass))));
                     middleRow.append($('<td>')
                         .append($('<span>').addClass('timepicker-second').attr({ 'data-time-component': 'seconds', 'title': options.tooltips.pickSecond }).attr('data-action', 'showSeconds')));
-                    bottomRow.append($('<td>')
+                    decrRow.append($('<td>')
                         .append($('<a>').attr({ href: '#', tabindex: '-1', 'title': options.tooltips.decrementSecond }).addClass('btn').attr('data-action', 'decrementSeconds')
-                            .append($('<span>').addClass(options.icons.down))));
+                            .append($('<span>').addClass(decrClass))));
                 }
 
                 if (!use24Hours) {
-                    topRow.append($('<td>').addClass('separator'));
+                    incrRow.append($('<td>').addClass('separator'));
                     middleRow.append($('<td>')
                         .append($('<button>').addClass('btn btn-primary').attr({ 'data-action': 'togglePeriod', tabindex: '-1', 'title': options.tooltips.togglePeriod })));
-                    bottomRow.append($('<td>').addClass('separator'));
+                    decrRow.append($('<td>').addClass('separator'));
                 }
 
                 return $('<div>').addClass('timepicker-picker')
                     .append($('<table>').addClass('table-condensed')
-                        .append([topRow, middleRow, bottomRow]));
+                        .append(options.reverseTimeNavigation? [decrRow, middleRow, incrRow] : [incrRow, middleRow, decrRow]));
             },
 
             getTimePickerTemplate = function () {
@@ -2327,6 +2330,19 @@
             return picker;
         };
 
+        picker.reverseTimeNavigation = function (reverseTimeNavigation) {
+            if (arguments.length === 0) {
+              return options.reverseTimeNavigation;
+            }
+
+            if (typeof reverseTimeNavigation !== 'boolean') {
+              throw new TypeError('reverseTimeNavigation() expects a boolean parameter');
+            }
+
+            options.reverseTimeNavigation = reverseTimeNavigation;
+            return picker;
+        };
+
         // initializing element and component attributes
         if (element.is('input')) {
             input = element;
@@ -2629,7 +2645,8 @@
         disabledTimeIntervals: false,
         disabledHours: false,
         enabledHours: false,
-        viewDate: false
+        viewDate: false,
+        reverseTimeNavigation: false
     };
 
     return $.fn.datetimepicker;
