@@ -405,6 +405,62 @@
                 return dataOptions;
             },
 
+            placeFixed = function() {
+                $(document.body).append(widget);
+
+                var offset = (component || element).offset();
+                var vertical = options.widgetPositioning.vertical;
+                var horizontal = options.widgetPositioning.horizontal;
+                var parent = null;
+
+                if (options.widgetParent) {
+                    parent = options.widgetParent;
+                } else if (element.is('input')) {
+                    parent = element.parent();
+                } else {
+                    parent = element;
+                }
+
+                var parentBounds = parent[0].getBoundingClientRect();
+
+                // Top and bottom logic
+                if (vertical === 'auto') {
+                    if (offset.top + widget.height() * 1.5 >= $(window).height() + $(window).scrollTop() &&
+                      widget.height() + element.outerHeight() < offset.top) {
+                      vertical = 'top';
+                    } else {
+                      vertical = 'bottom';
+                    }
+                }
+                if (vertical === 'top') {
+                    widget.addClass('top').removeClass('bottom');
+                } else {
+                    widget.addClass('bottom').removeClass('top');
+                }
+
+                // Left and right logic
+                if (horizontal === 'auto') {
+                    if (parent.width() < offset.left + widget.outerWidth() / 2 &&
+                      offset.left + widget.outerWidth() > $(window).width()) {
+                      horizontal = 'right';
+                    } else {
+                      horizontal = 'left';
+                    }
+                }
+                if (horizontal === 'right') {
+                    widget.addClass('pull-right');
+                } else {
+                    widget.removeClass('pull-right');
+                }
+
+                var top = vertical === 'top' ? 'auto' : parentBounds.top + parentBounds.height;
+                var bottom = vertical === 'top' ? $(window).height() - parentBounds.bottom + parentBounds.height : 'auto';
+                var left = horizontal === 'left' ? parentBounds.left : 'auto';
+                var right = horizontal === 'left' ? 'auto' : $(window).width() - parentBounds.right;
+
+                widget.css({position: 'fixed', zIndex: 9999, top: top, bottom: bottom, left: left, right: right});
+            },
+
             place = function () {
                 var position = (component || element).position(),
                     offset = (component || element).offset(),
@@ -1254,7 +1310,13 @@
                 if (component && component.hasClass('btn')) {
                     component.toggleClass('active');
                 }
-                place();
+                if (options.fixedPlacement && !options.inline && document.body.getBoundingClientRect) {
+                  placeFixed();
+
+                } else {
+                  place();
+                }
+
                 widget.show();
                 if (options.focusOnShow && !input.is(':focus')) {
                     input.focus();
@@ -2342,6 +2404,19 @@
             options.reverseTimeNavigation = reverseTimeNavigation;
             return picker;
         };
+
+      picker.fixedPlacement = function (fixedPlacement) {
+        if (arguments.length === 0) {
+          return options.fixedPlacement;
+        }
+
+        if (typeof fixedPlacement !== 'boolean') {
+          throw new TypeError('fixedPlacement() expects a boolean parameter');
+        }
+
+        options.fixedPlacement = fixedPlacement;
+        return picker;
+      };
 
         // initializing element and component attributes
         if (element.is('input')) {
